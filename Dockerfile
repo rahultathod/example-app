@@ -1,22 +1,22 @@
-FROM composer:2.0 as build
-COPY . /app/
-RUN composer install --prefer-dist --no-dev --optimize-autoloader --no-interaction
+FROM php:7.4-fpm-alpine
 
-FROM php:8.0-apache-buster as production
+RUN apk add --no-cache nginx wget
 
-ENV APP_ENV=production
-ENV APP_DEBUG=false
+RUN mkdir -p /run/nginx
 
-RUN docker-php-ext-configure opcache --enable-opcache && \
-    docker-php-ext-install pdo pdo_mysql
-COPY docker/php/conf.d/opcache.ini /usr/local/etc/php/conf.d/opcache.ini
+COPY docker/nginx.conf /etc/nginx/nginx.conf
 
-COPY --from=build /app /var/www/html
-COPY docker/000-default.conf /etc/apache2/sites-available/000-default.conf
-COPY .env.prod /var/www/html/.env
+RUN mkdir -p /app
+COPY . /app
+COPY ./src /app
 
-RUN php artisan config:cache && \
-    php artisan route:cache && \
-    chmod 777 -R /var/www/html/storage/ && \
-    chown -R www-data:www-data /var/www/ && \
-    a2enmod rewrite
+RUN sh -c "wget http://getcomposer.org/composer.phar && chmod a+x composer.phar && mv composer.phar /usr/local/bin/composer"
+RUN cd /app && \
+    /usr/local/bin/composer install --no-dev
+
+RUN chown -R www-data: /app
+
+CMD sh /app/docker/startup.sh
+
+
+### new docker for laravel
