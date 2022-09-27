@@ -1,13 +1,5 @@
 FROM php:7.4-fpm
 
-RUN apt-get update apt-get install -y \ 
-    git \
-    curl \
-    libpng-dev \
-    libonig-dev \
-    zip \
-    unzip
-
 RUN apk add --no-cache nginx wget
 
 RUN mkdir -p /run/nginx
