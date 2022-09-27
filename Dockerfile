@@ -1,12 +1,4 @@
-FROM php:7.4-fpm
-
-RUN apt-get update apt-get install -y \ 
-    git \
-    curl \
-    libpng-dev \
-    libonig-dev \
-    zip \
-    unzip
+FROM php:7.4-fpm-alpine
 
 RUN apk add --no-cache nginx wget
 
@@ -19,7 +11,6 @@ COPY . /app
 # COPY ./src /app
 
 RUN sh -c "wget http://getcomposer.org/composer.phar && chmod a+x composer.phar && mv composer.phar /usr/local/bin/composer"
-RUN docker-php-ext-install pdo_mysql mbstring
 RUN cd /app && \
     /usr/local/bin/composer install --no-dev
 
